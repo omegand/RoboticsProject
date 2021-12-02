@@ -7,6 +7,8 @@ TagManager:
   - gold
   - rock
   - obstacle
+  - Ground
+  - Avoid
   layers:
   - Default
   - TransparentFX
