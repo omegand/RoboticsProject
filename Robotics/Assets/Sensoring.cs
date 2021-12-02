@@ -7,12 +7,6 @@ public class Sensoring : MonoBehaviour
 {
 
     private bool hitGround;
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
     void FixedUpdate()
     {
         RaycastHit hit;
