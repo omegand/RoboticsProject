@@ -10,6 +10,7 @@ TagManager:
   - Ground
   - Avoid
   - arm
+  - dropzone
   layers:
   - Default
   - TransparentFX

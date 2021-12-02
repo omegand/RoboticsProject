@@ -57,8 +57,17 @@ public class Movement : MonoBehaviour
 
     private void LockArms()
     {
-        hands[1].Close(true);
-        hands[0].Close(false);
+        if (hands[1].closed && hands[0].closed) {
+            transform.Rotate(0, 180, 0);
+            modes = 0;
+            stopped = false;
+
+        }
+        else
+        {
+            hands[1].Close(true);
+            hands[0].Close(false);
+        }
     }
 
     private void CheckColor()

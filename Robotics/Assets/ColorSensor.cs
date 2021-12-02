@@ -17,7 +17,9 @@ public class ColorSensor : MonoBehaviour
                 case "rock":
                     color = Color.gray; break;
                 case "obstacle":
-                    color = Color.red; break;
+                    color = Color.red; break;        
+                case "dropzone":
+                    color = Color.green; break;
                 default: color = Color.black; break;
             }
         }
