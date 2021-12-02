@@ -15,14 +15,18 @@ public class Movement : MonoBehaviour
     private USSensor ultraSound;
     [SerializeField]
     private ColorSensor colorSensor;
+    [SerializeField]
+    Arm[] hands;
     Vector3 input;
     float turnRatio = 2;
     Rigidbody rb;
     bool stopped = false;
     private int modes = 0;
+
     void Start()
     {
         rb = GetComponent<Rigidbody>();
+        rb.centerOfMass = Vector3.zero;
     }
 
     void FixedUpdate()
@@ -36,6 +40,7 @@ public class Movement : MonoBehaviour
         {
 
             case 1:
+                GoldLogic();
                 break;
             default:
                 break;
@@ -43,6 +48,17 @@ public class Movement : MonoBehaviour
 
         IRLineTrack();
         UltraSoundSensor();
+    }
+
+    private void GoldLogic()
+    {
+        LockArms();
+    }
+
+    private void LockArms()
+    {
+        hands[1].Close(true);
+        hands[0].Close(false);
     }
 
     private void CheckColor()
