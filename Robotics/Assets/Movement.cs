@@ -21,7 +21,7 @@ public class Movement : MonoBehaviour
     float turnRatio = 2;
     Rigidbody rb;
     bool stopped = false;
-    private int modes = 0;
+    private int mode = 0;
 
     void Start()
     {
@@ -32,11 +32,11 @@ public class Movement : MonoBehaviour
     void FixedUpdate()
     {
         input = transform.right;
-        if (stopped && modes == 0)
+        if (stopped && mode == 0)
         {
             CheckColor();
         }
-        switch (modes)
+        switch (mode)
         {
 
             case 1:
@@ -57,9 +57,10 @@ public class Movement : MonoBehaviour
 
     private void LockArms()
     {
-        if (hands[1].closed && hands[0].closed) {
+        if (hands[1].closed && hands[0].closed)
+        {
             transform.Rotate(0, 180, 0);
-            modes = 0;
+            mode = 0;
             stopped = false;
 
         }
@@ -74,7 +75,7 @@ public class Movement : MonoBehaviour
     {
         if (colorSensor.color == Color.yellow)
         {
-            modes = 1;
+            mode = 1;
         }
     }
 
@@ -87,7 +88,11 @@ public class Movement : MonoBehaviour
         }
         else
         {
-            transform.Rotate(0, turnRatio, 0);
+            if (!rightSensor.InsideTrack() && leftSensor.InsideTrack())
+                transform.Rotate(0, -turnRatio, 0);
+
+            else transform.Rotate(0, turnRatio, 0);
+
         }
     }
     private void UltraSoundSensor()
