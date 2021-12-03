@@ -16,6 +16,8 @@ public class Movement : MonoBehaviour
     [SerializeField]
     private ColorSensor colorSensor;
     [SerializeField]
+    private Animator hand;
+    [SerializeField]
     Arm[] hands;
     Vector3 input;
     float turnRatio = 2;
@@ -89,13 +91,14 @@ public class Movement : MonoBehaviour
     }
     IEnumerator StartRotate(int initialY)
     {
+        hand.Play("Grab");
         while (rotating)
         {
             int eulerY = Mathf.FloorToInt(transform.rotation.eulerAngles.y);
             if (eulerY != (initialY + 180))
             {
                 transform.Rotate(0, 1, 0);
-                yield return new WaitForSeconds(0.05f);
+                yield return new WaitForSeconds(0.01f);
             }
             else
             {
