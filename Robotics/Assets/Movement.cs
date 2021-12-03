@@ -32,6 +32,7 @@ public class Movement : MonoBehaviour
 
     void FixedUpdate()
     {
+        Debug.Log(colorSensor.color.ToString());
         ModeChange();
         input = transform.right;
         switch (mode)
@@ -50,11 +51,11 @@ public class Movement : MonoBehaviour
 
     private void ModeChange()
     {
-        if (inFront && colorSensor.color == Color.yellow && !holding) mode = 1;
-        else
-        {
-            mode = 0;
+        if (inFront && colorSensor.color == Color.yellow && !holding) {
+            mode = 1; return;
         }
+        if(inFront && holding)
+        mode = 0;
     }
 
     private void GoldLogic()
