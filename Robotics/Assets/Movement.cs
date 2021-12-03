@@ -24,6 +24,8 @@ public class Movement : MonoBehaviour
     private float mode = 0;
     private bool holding;
 
+    private bool rotating;
+
     void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -32,6 +34,10 @@ public class Movement : MonoBehaviour
 
     void FixedUpdate()
     {
+        if(rotating)
+        {
+            return;
+        }
         Debug.Log(colorSensor.color.ToString());
         ModeChange();
         input = transform.right;
@@ -57,19 +63,44 @@ public class Movement : MonoBehaviour
         if(inFront && holding)
         mode = 0;
     }
-
-    private void GoldLogic()
+    private bool BothClosed()
     {
         if (hands[1].closed && hands[0].closed)
+            return true;
+
+        return false;
+    }
+    private void GoldLogic()
+    {
+        if (BothClosed())
         {
-            transform.Rotate(0, 180, 0);
+            rotating = true;
+           //transform.Rotate(0, 180, 0);
             mode = 0;
             holding = true;
+
+            StartCoroutine(StartRotate(Mathf.FloorToInt(transform.rotation.eulerAngles.y)));
         }
         else
         {
             hands[1].Close(true);
             hands[0].Close(false);
+        }
+    }
+    IEnumerator StartRotate(int initialY)
+    {
+        while (rotating)
+        {
+            int eulerY = Mathf.FloorToInt(transform.rotation.eulerAngles.y);
+            if (eulerY != (initialY + 180))
+            {
+                transform.Rotate(0, 1, 0);
+                yield return new WaitForSeconds(0.05f);
+            }
+            else
+            {
+                rotating = false;
+            }
         }
     }
     private void IRLineTrack()
