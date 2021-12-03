@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class GoldColission : MonoBehaviour
 {
-    int armCount = 0;
+  public  int armCount = 0;
     GameObject[] arms = new GameObject[2];
 
     private GameObject handObject;

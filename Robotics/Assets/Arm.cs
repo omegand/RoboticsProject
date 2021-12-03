@@ -5,6 +5,7 @@ using UnityEngine;
 public class Arm : MonoBehaviour
 {
     public bool closed = false;
+
     public bool Close(bool left) {
         if (!closed)
         {

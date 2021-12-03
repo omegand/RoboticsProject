@@ -13,16 +13,26 @@ public class ColorSensor : MonoBehaviour
             switch (hit.collider.tag)
             {
                 case "gold":
-                    color = Color.yellow; break;
+                    color = Color.yellow;
+                    return;
                 case "rock":
-                    color = Color.gray; break;
+                    color = Color.gray; 
+                    return;
                 case "obstacle":
-                    color = Color.red; break;        
+                    color = Color.red;
+                    return;        
                 case "dropzone":
-                    color = Color.green; break;
-                default: color = Color.black; break;
+                    color = Color.green;
+                    return;
+                default:
+                    break;
             }
         }
+        color = Color.black;
+    }
+    private void OnDrawGizmos()
+    {
+        Debug.DrawRay(transform.position, transform.right * 2f, Color.red);
     }
 
 }

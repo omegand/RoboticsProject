@@ -25,8 +25,8 @@ public class Movement : MonoBehaviour
     bool inFront = false;
     private float mode = 0;
     private bool holding;
-
     private bool rotating;
+
 
     void Start()
     {
@@ -36,18 +36,14 @@ public class Movement : MonoBehaviour
 
     void FixedUpdate()
     {
-        if(rotating)
-        {
-            return;
-        }
-        Debug.Log(colorSensor.color.ToString());
+        UltraSoundSensor();
+        if (rotating) return;
         ModeChange();
         input = transform.right;
         switch (mode)
         {
             case 0:
                 IRLineTrack();
-                UltraSoundSensor();
                 break;
             case 1:
                 GoldLogic();
@@ -59,11 +55,21 @@ public class Movement : MonoBehaviour
 
     private void ModeChange()
     {
-        if (inFront && colorSensor.color == Color.yellow && !holding) {
-            mode = 1; return;
+        if (inFront && colorSensor.color == Color.yellow && !holding)
+        {
+            mode = 1; 
+            return;
         }
-        if(inFront && holding)
-        mode = 0;
+        if (colorSensor.color == Color.green && !rotating) 
+        {
+            holding = false;
+            rotating = true;
+            hand.Play("Back");
+            StartCoroutine(StartRotate(3));
+            GameObject.FindGameObjectWithTag("gold").GetComponent<GoldColission>().armCount = 0;
+            
+        }
+         //mode = 0;
     }
     private bool BothClosed()
     {
@@ -76,12 +82,11 @@ public class Movement : MonoBehaviour
     {
         if (BothClosed())
         {
-            rotating = true;
-           //transform.Rotate(0, 180, 0);
             mode = 0;
             holding = true;
-
-            StartCoroutine(StartRotate(Mathf.FloorToInt(transform.rotation.eulerAngles.y)));
+            rotating = true;
+            hand.Play("Grab");
+            StartCoroutine(StartRotate(0));
         }
         else
         {
@@ -89,22 +94,19 @@ public class Movement : MonoBehaviour
             hands[0].Close(false);
         }
     }
-    IEnumerator StartRotate(int initialY)
+    void OpenHands() {
+        hands[0].Close(true);
+        hands[1].Close(false);
+    }
+    IEnumerator StartRotate(int delay)
     {
-        hand.Play("Grab");
-        while (rotating)
+        yield return new WaitForSeconds(delay);
+        for (int i = 0; i < 120; i++)
         {
-            int eulerY = Mathf.FloorToInt(transform.rotation.eulerAngles.y);
-            if (eulerY != (initialY + 180))
-            {
-                transform.Rotate(0, 1, 0);
-                yield return new WaitForSeconds(0.01f);
-            }
-            else
-            {
-                rotating = false;
-            }
+            transform.Rotate(0, 1.5f, 0);
+            yield return new WaitForSeconds(Time.fixedDeltaTime);
         }
+        rotating = false;   
     }
     private void IRLineTrack()
     {
@@ -124,8 +126,8 @@ public class Movement : MonoBehaviour
     private void UltraSoundSensor()
     {
         if (ultraSound.found) inFront = true;
+        else inFront = false;
     }
-
     public void Drive(Vector3 input)
     {
         rb.MovePosition(input);

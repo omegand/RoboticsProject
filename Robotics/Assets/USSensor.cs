@@ -13,12 +13,10 @@ public class USSensor : MonoBehaviour
             if (hit.collider.tag.Equals("gold"))
             {
                 found = true;
-            }
-            else
-            {
-                found = false;
+                return;
             }
         }
+        found = false;
     }
 
     private void OnDrawGizmos()
