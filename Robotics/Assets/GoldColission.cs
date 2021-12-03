@@ -4,25 +4,26 @@ using UnityEngine;
 
 public class GoldColission : MonoBehaviour
 {
-    bool glued;
-    GameObject arm;
+    int armCount = 0;
+    GameObject[] arms = new GameObject[2];
     private void FixedUpdate()
     {
-        if (glued) 
+        if (armCount == 2)
         {
-            transform.position = arm.transform.position;
+            transform.position = Vector3.Lerp(
+                arms[0].transform.position,
+                arms[1].transform.position, 
+                0.5f);
         }
     }
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.tag == "arm")
+        if (collision.gameObject.tag == "arm" && armCount < 2)
         {
-
-            glued = true;
-            arm = collision.gameObject;
-            arm.GetComponent<Arm>().closed = true;
-
+            arms[armCount] = collision.gameObject;
+            arms[armCount].GetComponent<Arm>().closed = true;
+            armCount++;
         }
     }
 }

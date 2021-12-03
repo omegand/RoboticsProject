@@ -20,8 +20,9 @@ public class Movement : MonoBehaviour
     Vector3 input;
     float turnRatio = 2;
     Rigidbody rb;
-    bool stopped = false;
-    private int mode = 0;
+    bool inFront = false;
+    private float mode = 0;
+    private bool holding;
 
     void Start()
     {
@@ -31,38 +32,38 @@ public class Movement : MonoBehaviour
 
     void FixedUpdate()
     {
+        ModeChange();
         input = transform.right;
-        if (stopped && mode == 0)
-        {
-            CheckColor();
-        }
         switch (mode)
         {
-
+            case 0:
+                IRLineTrack();
+                UltraSoundSensor();
+                break;
             case 1:
                 GoldLogic();
                 break;
             default:
                 break;
         }
+    }
 
-        IRLineTrack();
-        UltraSoundSensor();
+    private void ModeChange()
+    {
+        if (inFront && colorSensor.color == Color.yellow && !holding) mode = 1;
+        else
+        {
+            mode = 0;
+        }
     }
 
     private void GoldLogic()
-    {
-        LockArms();
-    }
-
-    private void LockArms()
     {
         if (hands[1].closed && hands[0].closed)
         {
             transform.Rotate(0, 180, 0);
             mode = 0;
-            stopped = false;
-
+            holding = true;
         }
         else
         {
@@ -70,18 +71,8 @@ public class Movement : MonoBehaviour
             hands[0].Close(false);
         }
     }
-
-    private void CheckColor()
-    {
-        if (colorSensor.color == Color.yellow)
-        {
-            mode = 1;
-        }
-    }
-
     private void IRLineTrack()
     {
-        if (stopped) return;
         if (rightSensor.InsideTrack() && leftSensor.InsideTrack())
         {
             Drive(transform.position + input * Time.fixedDeltaTime * robotspeed);
@@ -97,7 +88,7 @@ public class Movement : MonoBehaviour
     }
     private void UltraSoundSensor()
     {
-        if (ultraSound.found) stopped = true;
+        if (ultraSound.found) inFront = true;
     }
 
     public void Drive(Vector3 input)
