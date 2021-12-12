@@ -8,9 +8,14 @@ public class USSensor : MonoBehaviour
     void FixedUpdate()
     {
         RaycastHit hit;
-        if (Physics.Raycast(transform.position, transform.right, out hit, 1f))
+        if (Physics.Raycast(transform.position, transform.right, out hit, 0.6f))
         {
             if (hit.collider.tag.Equals("gold"))
+            {
+                found = true;
+                return;
+            }
+            else if(hit.collider.tag.Equals("rock"))
             {
                 found = true;
                 return;
@@ -21,7 +26,7 @@ public class USSensor : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        Debug.DrawRay(transform.position, transform.right * 1f, Color.green);
+        Debug.DrawRay(transform.position, transform.right * 0.6f, Color.green);
     }
 
 }

@@ -25,11 +25,13 @@ public class GoldColission : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
+        /*
         if (collision.gameObject.tag == "arm" && armCount < 2)
         {
             arms[armCount] = collision.gameObject;
             arms[armCount].GetComponent<Arm>().closed = true;
             armCount++;
         }
+        */
     }
 }
