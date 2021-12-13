@@ -35,11 +35,8 @@ public class Movement : MonoBehaviour
     private bool robotRotated;
     private bool robotDrop;
     private bool robotStartHandMove;
-
     private bool robotHandMoved;
-
     private bool robotMoving;
-
     private bool robotHandOpening;
 
 
@@ -125,7 +122,8 @@ public class Movement : MonoBehaviour
     }
     private void RockLogic()
     {
-        if (!handMovements.armsClosed())
+        Debug.Log("Test");
+        if (!handMovements.armsClosed() && !robotDrop)
         {
             handMovements.StartClosing();
         }
@@ -133,7 +131,26 @@ public class Movement : MonoBehaviour
         {
             if(!robotHandOpening && !AnimatorIsPlaying("Back"))
             {
+                robotMoving = false;
+                robotHandMoved = false;
+                robotHandOpening = true;
+                handMovements.StartOpening();
                 StartCoroutine(OpenHand());
+            }
+            else if(robotMoving && !AnimatorIsPlaying("Back"))
+            {
+                robotMoving = false;
+                StartCoroutine(MoveBackWard());
+            }
+            else if(rotating && !AnimatorIsPlaying("Back"))
+            {
+                Debug.Log("Hmmm");
+                rotating = false;
+                StartCoroutine(StartRotateAngle(1, 1f, 90));
+            }
+            else if(robotRotated)
+            {
+               // mode = 0;
             }
         }
         else
@@ -197,16 +214,30 @@ public class Movement : MonoBehaviour
         }
         hand.Play("Back");
         robotDrop = true;
-        handMovements.OpenBoth();
 
+
+    }
+    IEnumerator MoveBackWard()
+    {
+        while(!rightSensor.InsideTrack() && !leftSensor.InsideTrack())
+        {
+            Drive(transform.position + -1 * input * Time.fixedDeltaTime * robotspeed);
+
+            yield return new WaitForSeconds(Time.fixedDeltaTime);
+        }
+        robotRotated = false;
+        rotating = true;
     }
     IEnumerator OpenHand()
     {
-        for(int i =0; i < 50; i++)
+        while(handMovements.opening)
         {
             handMovements.OpenHands();
-            yield return new WaitForSeconds(0.05f);
+            yield return new WaitForSeconds(Time.fixedDeltaTime);
         }
+        robotMoving = true;
+        robotRotated = true;
+        rotating = false;
     }
     private void IRLineTrack()
     {
@@ -234,7 +265,7 @@ public class Movement : MonoBehaviour
     }
     private bool AnimatorIsPlaying(string stateName)
     {
-        return hand.GetCurrentAnimatorStateInfo(0).IsName(stateName);
+        return AnimatorIsPlaying() && hand.GetCurrentAnimatorStateInfo(0).IsName(stateName);
     }
     private bool AnimatorIsPlaying()
     {

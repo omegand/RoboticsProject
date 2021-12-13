@@ -11,6 +11,8 @@ public class MoveLogic : MonoBehaviour
     private bool closed = false;
     private bool closing = false;
 
+    public bool opening = false;
+
     public GameObject touchedObject;
 
     private GameObject handObject;
@@ -23,7 +25,7 @@ public class MoveLogic : MonoBehaviour
     }
     private void FixedUpdate()
     {
-        if(BothTouchSensorTouched())
+        if(BothTouchSensorTouched() && touchedObject != null)
         {
             touchedObject.transform.SetPositionAndRotation(Vector3.Lerp(
                 arms.lefthand.transform.position,
@@ -53,9 +55,21 @@ public class MoveLogic : MonoBehaviour
 
         return false;
     }
+    public bool BothAreNull()
+    {
+        if (arms.leftSensor.touchedSomething == null && arms.rightSensor.touchedSomething == null)
+            return true;
+
+        return false;
+    }
     public void StartClosing()
     {
         closing = true;
+    }
+    public void StartOpening()
+    {
+        opening = true;
+
     }
     public void CloseBoth()
     {
@@ -81,10 +95,21 @@ public class MoveLogic : MonoBehaviour
             leftHandMoved += Vector3.forward * Time.deltaTime;
             arms.lefthand.transform.Translate(Vector3.forward * Time.deltaTime);
         }
+        else
+            arms.leftSensor.touchedSomething = null;
+
         if (arms.rightSensor.touchedSomething != null && rightHandMoved.z >= 0)
         {
             rightHandMoved += Vector3.back * Time.deltaTime;
             arms.righthand.transform.Translate(Vector3.back * Time.deltaTime);
+        }
+        else
+            arms.rightSensor.touchedSomething = null;
+
+        if(BothAreNull())
+        {
+            touchedObject = null;
+            opening = false;
         }
     }
     public void OpenBoth()
