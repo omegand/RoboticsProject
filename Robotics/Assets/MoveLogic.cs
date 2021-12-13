@@ -108,6 +108,7 @@ public class MoveLogic : MonoBehaviour
 
         if(BothAreNull())
         {
+            closed = false;
             touchedObject = null;
             opening = false;
         }

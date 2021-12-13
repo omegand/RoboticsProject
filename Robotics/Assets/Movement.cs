@@ -105,7 +105,6 @@ public class Movement : MonoBehaviour
         }
         else if(!rotating && holding)
         {
-            Debug.Log("Meh");
             mode = 0;
         }
         /*
@@ -137,8 +136,6 @@ public class Movement : MonoBehaviour
             robotHandMoved = true;
             handMovements.StartOpening();
             StartCoroutine(OpenHand());
-
-           // StartCoroutine(StartRotateAngle(3, 1f, 180));
         }
         else if(robotMoving && !holding)
         {
