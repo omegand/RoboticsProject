@@ -156,7 +156,6 @@ public class Movement : MonoBehaviour
         }
         else if(rotating && !AnimatorIsPlaying("Back") && robotRotated)
         {
-            Debug.Log("Hello");
             mode = 0;
             ResetStates();
         }
