@@ -127,6 +127,7 @@ public class Movement : MonoBehaviour
     {
         if(!robotStartHandMove)
         {
+            robotRotated = false;
             robotStartHandMove = true;
             hand.Play("Back");
         }
@@ -145,7 +146,11 @@ public class Movement : MonoBehaviour
         else if(!holding && !AnimatorIsPlaying("Grab") && !rotating && !robotHandMoved)
         {
             rotating = true;
-            StartCoroutine(StartRotateAngle(3, 1f, 180));
+            StartCoroutine(StartRotateAngle(1, 1f, 180));
+        }
+        else if(robotRotated)
+        {
+            mode = 0;
         }
        // GameObject.FindGameObjectWithTag("gold").GetComponent<GoldColission>().armCount = 0;
     }
