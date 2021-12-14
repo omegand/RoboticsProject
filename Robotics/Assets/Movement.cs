@@ -77,6 +77,11 @@ public class Movement : MonoBehaviour
             mode = 1; 
             return;
         }
+        if(inFront && colorSensor.RockColor == Color.red)
+        {
+            mode = 4;
+            return;
+        }
         if(colorSensor.RockColor == Color.gray && inFront && mode != 2)
         {
             mode = 2;
