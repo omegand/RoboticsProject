@@ -1523,15 +1523,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e16867a4c09d6f54385c631abe4951b0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  robotspeed: 2
+  robotspeed: 3
   rightSensor: {fileID: 1567972812}
   leftSensor: {fileID: 936339850}
   ultraSound: {fileID: 1628729827}
   colorSensor: {fileID: 2100496907}
   hand: {fileID: 1326959446}
-  hands:
-  - {fileID: 0}
-  - {fileID: 0}
   handMovements: {fileID: 1326959447}
 --- !u!1 &563958582
 GameObject:
@@ -2990,6 +2987,7 @@ MonoBehaviour:
     righthand: {fileID: 616988264}
     leftSensor: {fileID: 441929696}
     rightSensor: {fileID: 1647100727}
+  closing: 0
   opening: 0
   touchedObject: {fileID: 0}
 --- !u!1 &1432258225

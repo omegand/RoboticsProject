@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class Movement : MonoBehaviour
@@ -18,8 +19,6 @@ public class Movement : MonoBehaviour
     private ColorSensor colorSensor;
     [SerializeField]
     private Animator hand;
-    [SerializeField]
-    Arm[] hands;
     Vector3 input;
     float turnRatio = 2;
     Rigidbody rb;
@@ -45,6 +44,7 @@ public class Movement : MonoBehaviour
     private GameObject USComponent;
 
     private bool robotAvoidedObstacle;
+    public TextMeshProUGUI Text;
 
     enum AvoidObstacleMode
     {
@@ -52,7 +52,7 @@ public class Movement : MonoBehaviour
     }
 
     private AvoidObstacleMode obstacleMode;
-
+    private bool stop = false;
 
     void Start()
     {
@@ -64,6 +64,7 @@ public class Movement : MonoBehaviour
 
     void FixedUpdate()
     {
+        if (stop) return;
         UltraSoundSensor();
         ModeChange();
         input = transform.right;
@@ -84,42 +85,56 @@ public class Movement : MonoBehaviour
             case 4:
                 MoveAroundObstacle();
                 break;
+            case 9:
+                End();
+                break;
             default:
                 break;
         }
     }
 
+    private void End()
+    {
+        Text.text = "The robot finished the track!!";
+        stop = true;
+    }
+
     private void ModeChange()
     {
-        if (inFront && colorSensor.RockColor == Color.yellow && !holding)
+        if (colorSensor.Color == Color.white)
         {
-            mode = 1; 
+            mode = 9;
             return;
         }
-        if(inFront && colorSensor.RockColor == Color.red)
+        if (inFront && colorSensor.Color == Color.yellow && !holding)
+        {
+            mode = 1;
+            return;
+        }
+        if (inFront && colorSensor.Color == Color.red)
         {
             mode = 4;
             return;
         }
-        if(colorSensor.RockColor == Color.gray && inFront && mode != 2)
+        if (colorSensor.Color == Color.gray && inFront && mode != 2)
         {
             mode = 2;
             return;
         }
-        if (colorSensor.RockColor == Color.green && holding) 
+        if (colorSensor.Color == Color.green && holding)
         {
             mode = 3;
             return;
-            
+
         }
     }
     private void GoldLogic()
     {
-        if(!handMovements.armsClosed() && !robotDrop)
+        if (!handMovements.armsClosed() && !robotDrop)
         {
-            handMovements.StartClosing();
+            handMovements.closing = true;
         }
-        else if(!rotating && !holding)
+        else if (!rotating && !holding)
         {
             holding = true;
             rotating = true;
@@ -127,74 +142,58 @@ public class Movement : MonoBehaviour
 
             StartCoroutine(StartRotateAngle(1, 1f, 180));
         }
-        else if(!rotating && holding)
+        else if (!rotating && holding)
         {
             ResetStates();
             mode = 0;
         }
-        /*
-        if (BothClosed())
-        {
-            mode = 0;
-            holding = true;
-            rotating = true;
-            hand.Play("Grab");
-            StartCoroutine(StartRotate(0));
-        }
-        else
-        {
-            hands[1].Close(true);
-            hands[0].Close(false);
-        }
-        */
     }
     private void DropGold()
     {
-        if(!robotStartHandMove)
+        if (!robotStartHandMove)
         {
             robotRotated = false;
             robotStartHandMove = true;
             hand.Play("Back");
         }
-        else if(holding && !AnimatorIsPlaying("Back"))
+        else if (holding && !AnimatorIsPlaying("Back"))
         {
             holding = false;
             robotHandMoved = true;
             handMovements.StartOpening();
             StartCoroutine(OpenHand());
         }
-        else if(robotMoving && !holding)
+        else if (robotMoving && !holding)
         {
             hand.Play("Grab");
             robotMoving = false;
         }
-        else if(!holding && !AnimatorIsPlaying("Grab") && !rotating && !robotHandMoved && !robotRotated)
+        else if (!holding && !AnimatorIsPlaying("Grab") && !rotating && !robotHandMoved && !robotRotated)
         {
             rotating = true;
             StartCoroutine(StartRotateAngle(1, 1f, 180));
         }
-        else if(robotRotated && !rotating)
+        else if (robotRotated && !rotating)
         {
             hand.Play("Back");
             rotating = true;
-           // robotMoving = true;
+            // robotMoving = true;
         }
-        else if(rotating && !AnimatorIsPlaying("Back") && robotRotated)
+        else if (rotating && !AnimatorIsPlaying("Back") && robotRotated)
         {
             mode = 0;
             ResetStates();
         }
-       // GameObject.FindGameObjectWithTag("gold").GetComponent<GoldColission>().armCount = 0;
     }
     private void RockLogic()
     {
         if (!handMovements.armsClosed() && !robotDrop)
         {
-            handMovements.StartClosing();
+            handMovements.closing = true;
         }
-        else if(robotDrop)
+        else if (robotDrop)
         {
-            if(!robotHandOpening && !AnimatorIsPlaying("Back"))
+            if (!robotHandOpening && !AnimatorIsPlaying("Back"))
             {
                 robotMoving = false;
                 robotHandOpening = true;
@@ -203,17 +202,17 @@ public class Movement : MonoBehaviour
                 handMovements.StartOpening();
                 StartCoroutine(OpenHand());
             }
-            else if(robotMoving && !AnimatorIsPlaying("Back"))
+            else if (robotMoving && !AnimatorIsPlaying("Back"))
             {
                 robotMoving = false;
                 StartCoroutine(MoveBackWard());
             }
-            else if(rotating && !AnimatorIsPlaying("Back"))
+            else if (rotating && !AnimatorIsPlaying("Back"))
             {
                 rotating = false;
                 StartCoroutine(StartRotateAngle(1, 1f, 90));
             }
-            else if(!rotating && robotRotated && !AnimatorIsPlaying("Back"))
+            else if (!rotating && robotRotated && !AnimatorIsPlaying("Back"))
             {
                 ResetStates();
                 mode = 0;
@@ -221,23 +220,23 @@ public class Movement : MonoBehaviour
         }
         else
         {
-           if(!AnimatorIsPlaying("Grab") && robotStartHandMove)
+            if (!AnimatorIsPlaying("Grab") && robotStartHandMove)
             {
                 robotHandMoved = true;
             }
-           if(throwRockLeft && !rotating && !robotRotated)
+            if (throwRockLeft && !rotating && !robotRotated)
             {
                 rotating = true;
                 StartCoroutine(StartRotateAngle(1, -1f, 90));
             }
-           else if(robotRotated && !robotHandMoved && !AnimatorIsPlaying("Grab"))
+            else if (robotRotated && !robotHandMoved && !AnimatorIsPlaying("Grab"))
             {
                 hand.Play("Grab");
                 robotStartHandMove = true;
             }
-           else if(robotRotated && !robotDrop && robotHandMoved)
+            else if (robotRotated && !robotDrop && robotHandMoved)
             {
-                if(!robotMoving)
+                if (!robotMoving)
                 {
                     robotMoving = true;
                     StartCoroutine(MoveForward());
@@ -247,24 +246,24 @@ public class Movement : MonoBehaviour
     }
     private void MoveAroundObstacle()
     {
-        if(obstacleMode == AvoidObstacleMode.None)
+        if (obstacleMode == AvoidObstacleMode.None)
         {
-            if(!rotating && !robotRotated)
+            if (!rotating && !robotRotated)
             {
                 rotating = true;
                 robotRotated = false;
                 StartCoroutine(StartRotateAngle(1, -1f, 90));
             }
-            else if(robotRotated)
+            else if (robotRotated)
             {
                 obstacleMode = AvoidObstacleMode.RotateLeft;
                 ResetStates();
                 mode = 0;
             }
         }
-        else if(!robotMoving && obstacleMode == AvoidObstacleMode.MoveUntilBack)
+        else if (!robotMoving && obstacleMode == AvoidObstacleMode.MoveUntilBack)
         {
-            if(InsideTrack())
+            if (InsideTrack())
             {
                 rotating = false;
                 robotRotated = false;
@@ -277,19 +276,19 @@ public class Movement : MonoBehaviour
                 StartCoroutine(MoveForwardUntilTrack(10));
             }
         }
-        else if(!robotMoving && obstacleMode == AvoidObstacleMode.RotateLeft)
+        else if (!robotMoving && obstacleMode == AvoidObstacleMode.RotateLeft)
         {
             obstacleMode = AvoidObstacleMode.Move;
 
             robotRotated = false;
             StartCoroutine(StartRotateAngle(1, -1f, 90));
         }
-        else if(robotRotated && obstacleMode == AvoidObstacleMode.Move)
+        else if (robotRotated && obstacleMode == AvoidObstacleMode.Move)
         {
 
             if (robotAvoidedObstacle)
             {
-                
+
                 obstacleMode = AvoidObstacleMode.MoveUntilBack;
             }
             else
@@ -301,7 +300,7 @@ public class Movement : MonoBehaviour
                 StartCoroutine(MoveForwardNew(50));
             }
         }
-        else if(!robotMoving && obstacleMode == AvoidObstacleMode.RotateRight)
+        else if (!robotMoving && obstacleMode == AvoidObstacleMode.RotateRight)
         {
             robotRotated = false;
             if (robotAvoidedObstacle)
@@ -309,25 +308,25 @@ public class Movement : MonoBehaviour
                 obstacleMode = AvoidObstacleMode.Move;
             }
             else
-            obstacleMode = AvoidObstacleMode.DetectionUS;
+                obstacleMode = AvoidObstacleMode.DetectionUS;
 
             StartCoroutine(StartRotateAngle(1, 1f, 90));
         }
-        else if(robotRotated && obstacleMode == AvoidObstacleMode.DetectionUS)
+        else if (robotRotated && obstacleMode == AvoidObstacleMode.DetectionUS)
         {
             obstacleMode = AvoidObstacleMode.MoveCheck;
             ultraSound.checkingObstacle = true;
             StartCoroutine(RotateUS(90, 1f));
         }
-        else if(usRotated && !robotMoving && obstacleMode == AvoidObstacleMode.MoveCheck)
+        else if (usRotated && !robotMoving && obstacleMode == AvoidObstacleMode.MoveCheck)
         {
             obstacleMode = AvoidObstacleMode.Check;
             robotMoving = true;
             StartCoroutine(MoveForwardNew(60));
         }
-        else if(usRotated && !robotMoving && obstacleMode == AvoidObstacleMode.Check)
+        else if (usRotated && !robotMoving && obstacleMode == AvoidObstacleMode.Check)
         {
-            if(ultraSound.found)
+            if (ultraSound.found)
             {
                 obstacleMode = AvoidObstacleMode.MoveCheck;
             }
@@ -338,10 +337,6 @@ public class Movement : MonoBehaviour
                 obstacleMode = AvoidObstacleMode.RotateRight;
             }
         }
-    }
-    void OpenHands() {
-        hands[0].Close(true);
-        hands[1].Close(false);
     }
     private void ResetStates()
     {
@@ -369,7 +364,7 @@ public class Movement : MonoBehaviour
     }
     IEnumerator MoveForward()
     {
-        for(int i = 0; i < 50; i++)
+        for (int i = 0; i < 50; i++)
         {
             Drive(transform.position + input * Time.fixedDeltaTime * robotspeed);
 
@@ -404,7 +399,7 @@ public class Movement : MonoBehaviour
     }
     IEnumerator MoveBackWard()
     {
-        while(!InsideTrack())
+        while (!InsideTrack())
         {
             Drive(transform.position + -1 * input * Time.fixedDeltaTime * robotspeed);
 
@@ -425,7 +420,7 @@ public class Movement : MonoBehaviour
     }
     IEnumerator OpenHand()
     {
-        while(handMovements.opening)
+        while (handMovements.opening)
         {
             handMovements.OpenHands();
             yield return new WaitForSeconds(Time.fixedDeltaTime);

@@ -6,17 +6,18 @@ public class USSensor : MonoBehaviour
 {
     public bool found = false;
     public bool checkingObstacle = false;
+    private float distance = 1f;
     void FixedUpdate()
     {
         RaycastHit hit;
         if (Physics.Raycast(transform.position, transform.right, out hit, 4f))
         {
-            if (hit.collider.tag.Equals("gold") && hit.distance < 0.6)
+            if (hit.collider.tag.Equals("gold") && hit.distance < distance)
             {
                 found = true;
                 return;
             }
-            else if(hit.collider.tag.Equals("rock") && hit.distance < 0.6)
+            else if(hit.collider.tag.Equals("rock") && hit.distance < distance)
             {
                 found = true;
                 return;

@@ -11,6 +11,7 @@ TagManager:
   - Avoid
   - arm
   - dropzone
+  - finish
   layers:
   - Default
   - TransparentFX

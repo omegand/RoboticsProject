@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class ColorSensor : MonoBehaviour
 {
-    public Color RockColor = Color.black;
+    public Color Color = Color.black;
 
     void FixedUpdate()
     {
@@ -14,22 +14,25 @@ public class ColorSensor : MonoBehaviour
             switch (hit.collider.tag)
             {
                 case "gold":
-                    RockColor = Color.yellow;
+                    Color = Color.yellow;
                     return;
                 case "rock":
-                    RockColor = Color.gray; 
+                    Color = Color.gray; 
                     return;
                 case "obstacle":
-                    RockColor = Color.red;
+                    Color = Color.red;
                     return;        
                 case "dropzone":
-                    RockColor = Color.green;
+                    Color = Color.green;
+                    return;
+                case "finish":
+                    Color = Color.white;
                     return;
                 default:
                     break;
             }
         }
-        RockColor = Color.black;
+        Color = Color.black;
     }
     private void OnDrawGizmos()
     {

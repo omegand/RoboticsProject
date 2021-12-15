@@ -9,7 +9,7 @@ public class MoveLogic : MonoBehaviour
     public Arms arms;
 
     private bool closed = false;
-    private bool closing = false;
+    public bool closing = false;
 
     public bool opening = false;
 
@@ -33,7 +33,6 @@ public class MoveLogic : MonoBehaviour
                 0.5f), handObject.transform.rotation);
         }
     }
-    // Update is called once per frame
     void Update()
     {
         if(closing)
@@ -62,15 +61,10 @@ public class MoveLogic : MonoBehaviour
 
         return false;
     }
-    public void StartClosing()
-    {
-        closing = true;
-    }
     public void StartOpening()
     {
         opening = true;
         touchedObject.GetComponent<Rigidbody>().useGravity = true;
-
     }
     public void CloseBoth()
     {
