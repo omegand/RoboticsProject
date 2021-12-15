@@ -69,6 +69,7 @@ public class MoveLogic : MonoBehaviour
     public void StartOpening()
     {
         opening = true;
+        touchedObject.GetComponent<Rigidbody>().useGravity = true;
 
     }
     public void CloseBoth()

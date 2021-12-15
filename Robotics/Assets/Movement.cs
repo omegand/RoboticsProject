@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class Movement : MonoBehaviour
 {
+
     [SerializeField]
     private float robotspeed;
     [SerializeField]
@@ -39,11 +40,26 @@ public class Movement : MonoBehaviour
     private bool robotMoving;
     private bool robotHandOpening;
 
+    private bool usRotated;
+
+    private GameObject USComponent;
+
+    private bool robotAvoidedObstacle;
+
+    enum AvoidObstacleMode
+    {
+        None, RotateLeft, RotateRight, Move, DetectionUS, MoveCheck, Check, MoveUntilBack
+    }
+
+    private AvoidObstacleMode obstacleMode;
+
 
     void Start()
     {
         rb = GetComponent<Rigidbody>();
+        USComponent = GameObject.Find("US");
         rb.centerOfMass = Vector3.zero;
+        obstacleMode = AvoidObstacleMode.RotateLeft;
     }
 
     void FixedUpdate()
@@ -64,6 +80,9 @@ public class Movement : MonoBehaviour
                 break;
             case 3:
                 DropGold();
+                break;
+            case 4:
+                MoveAroundObstacle();
                 break;
             default:
                 break;
@@ -110,6 +129,7 @@ public class Movement : MonoBehaviour
         }
         else if(!rotating && holding)
         {
+            ResetStates();
             mode = 0;
         }
         /*
@@ -225,6 +245,100 @@ public class Movement : MonoBehaviour
             }
         }
     }
+    private void MoveAroundObstacle()
+    {
+        if(obstacleMode == AvoidObstacleMode.None)
+        {
+            if(!rotating && !robotRotated)
+            {
+                rotating = true;
+                robotRotated = false;
+                StartCoroutine(StartRotateAngle(1, -1f, 90));
+            }
+            else if(robotRotated)
+            {
+                obstacleMode = AvoidObstacleMode.RotateLeft;
+                ResetStates();
+                mode = 0;
+            }
+        }
+        else if(!robotMoving && obstacleMode == AvoidObstacleMode.MoveUntilBack)
+        {
+            if(InsideTrack())
+            {
+                rotating = false;
+                robotRotated = false;
+                obstacleMode = AvoidObstacleMode.None;
+                ultraSound.checkingObstacle = false;
+            }
+            else
+            {
+                robotMoving = true;
+                StartCoroutine(MoveForwardUntilTrack(10));
+            }
+        }
+        else if(!robotMoving && obstacleMode == AvoidObstacleMode.RotateLeft)
+        {
+            obstacleMode = AvoidObstacleMode.Move;
+
+            robotRotated = false;
+            StartCoroutine(StartRotateAngle(1, -1f, 90));
+        }
+        else if(robotRotated && obstacleMode == AvoidObstacleMode.Move)
+        {
+
+            if (robotAvoidedObstacle)
+            {
+                
+                obstacleMode = AvoidObstacleMode.MoveUntilBack;
+            }
+            else
+            {
+                robotMoving = true;
+
+                obstacleMode = AvoidObstacleMode.RotateRight;
+
+                StartCoroutine(MoveForwardNew(50));
+            }
+        }
+        else if(!robotMoving && obstacleMode == AvoidObstacleMode.RotateRight)
+        {
+            robotRotated = false;
+            if (robotAvoidedObstacle)
+            {
+                obstacleMode = AvoidObstacleMode.Move;
+            }
+            else
+            obstacleMode = AvoidObstacleMode.DetectionUS;
+
+            StartCoroutine(StartRotateAngle(1, 1f, 90));
+        }
+        else if(robotRotated && obstacleMode == AvoidObstacleMode.DetectionUS)
+        {
+            obstacleMode = AvoidObstacleMode.MoveCheck;
+            ultraSound.checkingObstacle = true;
+            StartCoroutine(RotateUS(90, 1f));
+        }
+        else if(usRotated && !robotMoving && obstacleMode == AvoidObstacleMode.MoveCheck)
+        {
+            obstacleMode = AvoidObstacleMode.Check;
+            robotMoving = true;
+            StartCoroutine(MoveForwardNew(60));
+        }
+        else if(usRotated && !robotMoving && obstacleMode == AvoidObstacleMode.Check)
+        {
+            if(ultraSound.found)
+            {
+                obstacleMode = AvoidObstacleMode.MoveCheck;
+            }
+            else
+            {
+                StartCoroutine(RotateUS(90, -1f));
+                robotAvoidedObstacle = true;
+                obstacleMode = AvoidObstacleMode.RotateRight;
+            }
+        }
+    }
     void OpenHands() {
         hands[0].Close(true);
         hands[1].Close(false);
@@ -239,16 +353,8 @@ public class Movement : MonoBehaviour
         robotHandMoved = false;
         robotMoving = false;
         throwRockLeft = true;
-    }
-    IEnumerator StartRotate(int delay)
-    {
-        yield return new WaitForSeconds(delay);
-        for (int i = 0; i < 120; i++)
-        {
-            transform.Rotate(0, 1.5f, 0);
-            yield return new WaitForSeconds(Time.fixedDeltaTime);
-        }
-        rotating = false;   
+        usRotated = false;
+        robotAvoidedObstacle = false;
     }
     IEnumerator StartRotateAngle(int delay, float angle, int amount)
     {
@@ -272,9 +378,33 @@ public class Movement : MonoBehaviour
         hand.Play("Back");
         robotDrop = true;
     }
+    IEnumerator MoveForwardNew(int frames)
+    {
+        for (int i = 0; i < frames; i++)
+        {
+            Drive(transform.position + input * Time.fixedDeltaTime * robotspeed);
+
+            yield return new WaitForSeconds(Time.fixedDeltaTime);
+        }
+        robotMoving = false;
+    }
+    IEnumerator MoveForwardUntilTrack(int frames)
+    {
+        for (int i = 0; i < frames; i++)
+        {
+            if (InsideTrack())
+            {
+                break;
+            }
+            Drive(transform.position + input * Time.fixedDeltaTime * robotspeed);
+
+            yield return new WaitForSeconds(Time.fixedDeltaTime);
+        }
+        robotMoving = false;
+    }
     IEnumerator MoveBackWard()
     {
-        while(!rightSensor.InsideTrack() && !leftSensor.InsideTrack())
+        while(!InsideTrack())
         {
             Drive(transform.position + -1 * input * Time.fixedDeltaTime * robotspeed);
 
@@ -282,6 +412,16 @@ public class Movement : MonoBehaviour
         }
         robotRotated = false;
         rotating = true;
+    }
+    IEnumerator RotateUS(int angle, float rotateStep)
+    {
+        for (int i = 0; i < angle; i++)
+        {
+            USComponent.transform.Rotate(0, rotateStep, 0);
+            yield return new WaitForSeconds(Time.fixedDeltaTime);
+        }
+        usRotated = true;
+
     }
     IEnumerator OpenHand()
     {
@@ -295,18 +435,22 @@ public class Movement : MonoBehaviour
     }
     private void IRLineTrack()
     {
-        if (rightSensor.InsideTrack() && leftSensor.InsideTrack())
+        if (InsideTrack())
         {
             Drive(transform.position + input * Time.fixedDeltaTime * robotspeed);
         }
         else
         {
-            if (!rightSensor.InsideTrack() && leftSensor.InsideTrack())
+            if (!rightSensor.hitGround && leftSensor.hitGround)
                 transform.Rotate(0, -turnRatio, 0);
 
             else transform.Rotate(0, turnRatio, 0);
 
         }
+    }
+    private bool InsideTrack()
+    {
+        return rightSensor.hitGround && leftSensor.hitGround;
     }
     private void UltraSoundSensor()
     {

@@ -5,14 +5,13 @@ using UnityEngine.EventSystems;
 
 public class Sensoring : MonoBehaviour
 {
-
-    private bool hitGround;
+    public bool hitGround { get; private set; }
     void FixedUpdate()
     {
         RaycastHit hit;
         if (Physics.Raycast(transform.position, new Vector3(0, -1, 0), out hit, 3f))
         {
-            if(hit.collider.gameObject.tag.Equals("Ground"))
+            if (hit.collider.gameObject.tag.Equals("Ground"))
             {
                 hitGround = true;
             }
@@ -21,9 +20,5 @@ public class Sensoring : MonoBehaviour
                 hitGround = false;
             }
         }
-    }
-    public bool InsideTrack()
-    {
-        return hitGround;
     }
 }

@@ -5,12 +5,12 @@ using UnityEngine;
 public class USSensor : MonoBehaviour
 {
     public bool found = false;
+    public bool checkingObstacle = false;
     void FixedUpdate()
     {
         RaycastHit hit;
         if (Physics.Raycast(transform.position, transform.right, out hit, 4f))
         {
-            Debug.Log(hit.collider.tag);
             if (hit.collider.tag.Equals("gold") && hit.distance < 0.6)
             {
                 found = true;
@@ -21,7 +21,7 @@ public class USSensor : MonoBehaviour
                 found = true;
                 return;
             }
-            else if (hit.collider.tag.Equals("obstacle") && hit.distance < 2.0)
+            else if (hit.collider.tag.Equals("obstacle") && (hit.distance < 2.0 || (hit.distance < 4.0 && checkingObstacle)))
             {
                 found = true;
                 return;
