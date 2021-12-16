@@ -264,7 +264,7 @@ public class Movement : MonoBehaviour
             obstacleMode = AvoidObstacleMode.Move;
 
             robotRotated = false;
-            StartCoroutine(StartRotateAngle(1, -1f, 90));
+            StartCoroutine(StartRotateAngle(1, -2f, 45));
         }
         else if (robotRotated && obstacleMode == AvoidObstacleMode.Move)
         {
@@ -293,7 +293,7 @@ public class Movement : MonoBehaviour
             else
                 obstacleMode = AvoidObstacleMode.DetectionUS;
 
-            StartCoroutine(StartRotateAngle(1, 1f, 90));
+            StartCoroutine(StartRotateAngle(1, 2f, 45));
         }
         else if (robotRotated && obstacleMode == AvoidObstacleMode.DetectionUS)
         {
@@ -305,7 +305,7 @@ public class Movement : MonoBehaviour
         {
             obstacleMode = AvoidObstacleMode.Check;
             robotMoving = true;
-            StartCoroutine(MoveForwardNew(60));
+            StartCoroutine(MoveForwardNew(50));
         }
         else if (usRotated && !robotMoving && obstacleMode == AvoidObstacleMode.Check)
         {
