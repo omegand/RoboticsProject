@@ -20,7 +20,7 @@ public class Movement : MonoBehaviour
     [SerializeField]
     private Animator hand;
     Vector3 input;
-    float turnRatio = 2;
+    float turnRatio = 4;
     Rigidbody rb;
     bool inFront = false;
     private float mode = 0;
@@ -140,7 +140,7 @@ public class Movement : MonoBehaviour
             rotating = true;
             hand.Play("Grab");
 
-            StartCoroutine(StartRotateAngle(1, 2f, 90));
+            StartCoroutine(StartRotateAngle(0, 2f, 90));
         }
         else if (!rotating && holding)
         {
@@ -165,7 +165,7 @@ public class Movement : MonoBehaviour
         else if (!holding && !rotating && !robotHandMoved && !robotRotated)
         {
             rotating = true;
-            StartCoroutine(StartRotateAngle(1, 2f, 90));
+            StartCoroutine(StartRotateAngle(0, 2f, 90));
         }
         else if (!rotating && !AnimatorIsPlaying("Back") && robotRotated)
         {
@@ -198,7 +198,7 @@ public class Movement : MonoBehaviour
             else if (rotating && !AnimatorIsPlaying("Back"))
             {
                 rotating = false;
-                StartCoroutine(StartRotateAngle(1, 1f, 90));
+                StartCoroutine(StartRotateAngle(0, 1f, 90));
             }
             else if (!rotating && robotRotated && !AnimatorIsPlaying("Back"))
             {
@@ -215,7 +215,7 @@ public class Movement : MonoBehaviour
             if (throwRockLeft && !rotating && !robotRotated)
             {
                 rotating = true;
-                StartCoroutine(StartRotateAngle(1, -1f, 90));
+                StartCoroutine(StartRotateAngle(0, -1f, 90));
             }
             else if (robotRotated && !robotDrop)
             {
@@ -235,7 +235,7 @@ public class Movement : MonoBehaviour
             {
                 rotating = true;
                 robotRotated = false;
-                StartCoroutine(StartRotateAngle(1, -1f, 90));
+                StartCoroutine(StartRotateAngle(0, -1f, 90));
             }
             else if (robotRotated)
             {
@@ -256,7 +256,7 @@ public class Movement : MonoBehaviour
             else
             {
                 robotMoving = true;
-                StartCoroutine(MoveForwardUntilTrack(10));
+                StartCoroutine(MoveForwardUntilTrack(20));
             }
         }
         else if (!robotMoving && obstacleMode == AvoidObstacleMode.RotateLeft)
@@ -264,14 +264,13 @@ public class Movement : MonoBehaviour
             obstacleMode = AvoidObstacleMode.Move;
 
             robotRotated = false;
-            StartCoroutine(StartRotateAngle(1, -2f, 45));
+            StartCoroutine(StartRotateAngle(0, -2f, 45));
         }
         else if (robotRotated && obstacleMode == AvoidObstacleMode.Move)
         {
 
             if (robotAvoidedObstacle)
             {
-
                 obstacleMode = AvoidObstacleMode.MoveUntilBack;
             }
             else
@@ -293,13 +292,13 @@ public class Movement : MonoBehaviour
             else
                 obstacleMode = AvoidObstacleMode.DetectionUS;
 
-            StartCoroutine(StartRotateAngle(1, 2f, 45));
+            StartCoroutine(StartRotateAngle(0, 2f, 45));
         }
         else if (robotRotated && obstacleMode == AvoidObstacleMode.DetectionUS)
         {
             obstacleMode = AvoidObstacleMode.MoveCheck;
             ultraSound.checkingObstacle = true;
-            StartCoroutine(RotateUS(90, 1f));
+            StartCoroutine(RotateUS(30, 3f));
         }
         else if (usRotated && !robotMoving && obstacleMode == AvoidObstacleMode.MoveCheck)
         {
@@ -315,7 +314,7 @@ public class Movement : MonoBehaviour
             }
             else
             {
-                StartCoroutine(RotateUS(90, -1f));
+                StartCoroutine(RotateUS(30, -3f));
                 robotAvoidedObstacle = true;
                 obstacleMode = AvoidObstacleMode.RotateRight;
             }
@@ -334,7 +333,7 @@ public class Movement : MonoBehaviour
         usRotated = false;
         robotAvoidedObstacle = false;
     }
-    IEnumerator StartRotateAngle(int delay, float angle, int amount)
+    IEnumerator StartRotateAngle(float delay, float angle, int amount)
     {
         yield return new WaitForSeconds(delay);
         for (int i = 0; i < amount; i++)
@@ -369,10 +368,6 @@ public class Movement : MonoBehaviour
     {
         for (int i = 0; i < frames; i++)
         {
-            if (InsideTrack())
-            {
-                break;
-            }
             Drive(transform.position + input * Time.fixedDeltaTime * robotspeed);
 
             yield return new WaitForSeconds(Time.fixedDeltaTime);
@@ -419,15 +414,36 @@ public class Movement : MonoBehaviour
         }
         else
         {
-            if (!rightSensor.hitGround && leftSensor.hitGround)
-                transform.Rotate(0, -turnRatio, 0);
+            if(holding)
+            {
+                if(InsideTrack(true))
+                {
+                    transform.Rotate(0, -turnRatio, 0);
+                }
+                else
+                {
+                    if (!rightSensor.hitGround && leftSensor.hitGround)
+                        transform.Rotate(0, -turnRatio, 0);
 
-            else transform.Rotate(0, turnRatio, 0);
+                    else transform.Rotate(0, turnRatio, 0);
+                }
+              
+            }
+            else
+            {
+                if (!rightSensor.hitGround && leftSensor.hitGround)
+                    transform.Rotate(0, -turnRatio, 0);
+                else transform.Rotate(0, turnRatio, 0);
+            }
 
         }
     }
-    private bool InsideTrack()
+    private bool InsideTrack(bool bothNull = false)
     {
+        if(bothNull)
+        {
+            return !rightSensor.hitGround && !leftSensor.hitGround;
+        }
         return rightSensor.hitGround && leftSensor.hitGround;
     }
     private void UltraSoundSensor()
