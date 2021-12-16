@@ -140,7 +140,7 @@ public class Movement : MonoBehaviour
             rotating = true;
             hand.Play("Grab");
 
-            StartCoroutine(StartRotateAngle(1, 1f, 180));
+            StartCoroutine(StartRotateAngle(1, 2f, 90));
         }
         else if (!rotating && holding)
         {
@@ -156,30 +156,18 @@ public class Movement : MonoBehaviour
             robotStartHandMove = true;
             hand.Play("Back");
         }
-        else if (holding && !AnimatorIsPlaying("Back"))
+        else if (!robotHandMoved && !AnimatorIsPlaying("Back") && handMovements.touchedObject != null)
         {
-            holding = false;
             robotHandMoved = true;
             handMovements.StartOpening();
             StartCoroutine(OpenHand());
         }
-        else if (robotMoving && !holding)
-        {
-            hand.Play("Grab");
-            robotMoving = false;
-        }
-        else if (!holding && !AnimatorIsPlaying("Grab") && !rotating && !robotHandMoved && !robotRotated)
+        else if (!holding && !rotating && !robotHandMoved && !robotRotated)
         {
             rotating = true;
-            StartCoroutine(StartRotateAngle(1, 1f, 180));
+            StartCoroutine(StartRotateAngle(1, 2f, 90));
         }
-        else if (robotRotated && !rotating)
-        {
-            hand.Play("Back");
-            rotating = true;
-            // robotMoving = true;
-        }
-        else if (rotating && !AnimatorIsPlaying("Back") && robotRotated)
+        else if (!rotating && !AnimatorIsPlaying("Back") && robotRotated)
         {
             mode = 0;
             ResetStates();
@@ -229,12 +217,7 @@ public class Movement : MonoBehaviour
                 rotating = true;
                 StartCoroutine(StartRotateAngle(1, -1f, 90));
             }
-            else if (robotRotated && !robotHandMoved && !AnimatorIsPlaying("Grab"))
-            {
-                hand.Play("Grab");
-                robotStartHandMove = true;
-            }
-            else if (robotRotated && !robotDrop && robotHandMoved)
+            else if (robotRotated && !robotDrop)
             {
                 if (!robotMoving)
                 {
@@ -370,7 +353,6 @@ public class Movement : MonoBehaviour
 
             yield return new WaitForSeconds(Time.fixedDeltaTime);
         }
-        hand.Play("Back");
         robotDrop = true;
     }
     IEnumerator MoveForwardNew(int frames)
@@ -425,6 +407,7 @@ public class Movement : MonoBehaviour
             handMovements.OpenHands();
             yield return new WaitForSeconds(Time.fixedDeltaTime);
         }
+        holding = false;
         robotMoving = true;
         robotHandMoved = false;
     }
