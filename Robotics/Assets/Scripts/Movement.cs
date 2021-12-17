@@ -48,7 +48,7 @@ public class Movement : MonoBehaviour
 
     enum AvoidObstacleMode
     {
-        None, RotateLeft, RotateRight, Move, DetectionUS, MoveCheck, Check, MoveUntilBack
+        None, RotateLeft, RotateRight, Move, DetectionUS, MoveCheck, Check, MoveUntilBack, MovedAvoidObstacle
     }
 
     private AvoidObstacleMode obstacleMode;
@@ -314,10 +314,16 @@ public class Movement : MonoBehaviour
             }
             else
             {
-                StartCoroutine(RotateUS(30, -3f));
-                robotAvoidedObstacle = true;
-                obstacleMode = AvoidObstacleMode.RotateRight;
+                obstacleMode = AvoidObstacleMode.MovedAvoidObstacle;
             }
+        }
+        else if(obstacleMode == AvoidObstacleMode.MovedAvoidObstacle)
+        {
+            obstacleMode = AvoidObstacleMode.RotateRight;
+            robotAvoidedObstacle = true;
+            StartCoroutine(RotateUS(30, -3f));
+            robotAvoidedObstacle = true;
+            StartCoroutine(MoveForwardNew(30));
         }
     }
     private void ResetStates()
