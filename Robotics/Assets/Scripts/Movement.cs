@@ -45,7 +45,7 @@ public class Movement : MonoBehaviour
 
     private bool robotAvoidedObstacle;
     public TextMeshProUGUI Text;
-
+    
     enum AvoidObstacleMode
     {
         None, RotateLeft, RotateRight, Move, DetectionUS, MoveCheck, Check, MoveUntilBack, MovedAvoidObstacle
@@ -56,6 +56,7 @@ public class Movement : MonoBehaviour
 
     void Start()
     {
+       // Time.timeScale = 10;
         rb = GetComponent<Rigidbody>();
         USComponent = GameObject.Find("US");
         rb.centerOfMass = Vector3.zero;
@@ -148,10 +149,12 @@ public class Movement : MonoBehaviour
             mode = 0;
         }
     }
+
     private void DropGold()
     {
         if (!robotStartHandMove)
         {
+            robotHandMoved = false;
             robotRotated = false;
             robotStartHandMove = true;
             hand.Play("Back");
@@ -256,7 +259,7 @@ public class Movement : MonoBehaviour
             else
             {
                 robotMoving = true;
-                StartCoroutine(MoveForwardUntilTrack(20));
+                StartCoroutine(MoveForwardUntilTrack(10));
             }
         }
         else if (!robotMoving && obstacleMode == AvoidObstacleMode.RotateLeft)
@@ -408,9 +411,11 @@ public class Movement : MonoBehaviour
             handMovements.OpenHands();
             yield return new WaitForSeconds(Time.fixedDeltaTime);
         }
-        holding = false;
         robotMoving = true;
         robotHandMoved = false;
+        yield return new WaitForSeconds(0.5f);  
+        holding = false;
+
     }
     private void IRLineTrack()
     {
