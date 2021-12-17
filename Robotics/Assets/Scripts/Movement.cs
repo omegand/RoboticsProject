@@ -101,7 +101,7 @@ public class Movement : MonoBehaviour
 
     private void ModeChange()
     {
-        if (colorSensor.Color == Color.white)
+        if (colorSensor.Color == Color.white && mode == 0)
         {
             mode = 9;
             return;
